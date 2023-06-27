@@ -1,19 +1,47 @@
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include <math.h>
 
 class Player
 {
 public:
     Vector2 position = {(float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2};
     Vector2 acceleration = {(float)0.0f, (float)0.0f};
+    Vector2 ptrPos = {(float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2};
 
     float velocity = 4.0f;
     float dAcc = 0.1f;
 
+    float radius = 20;
+    float ptrRadius = 10;
+    float borderRadius = 45;
+
+    float angle = 0.0f;
+    float dx = 0.0f, dy = 0.0f, dxx = 0.0f, dyy = 0.0f;
+
     void Draw()
     {
-        DrawCircle(position.x, position.y, 20, BLUE);
+        DrawCircleV(position, borderRadius, BLANK);
+        DrawCircleV(position, radius, BLUE);
+        DrawCircleV(ptrPos, ptrRadius, RED);
+    }
+
+    void MovePointer()
+    {
+        if (!CheckCollisionPointCircle(ptrPos, position, borderRadius - 20))
+        {
+            dx = ptrPos.x - position.x;
+            dy = ptrPos.y - position.y;
+
+            angle = atan2f(dy, dx);
+
+            dxx = (borderRadius - ptrRadius) * cosf(angle);
+            dyy = (borderRadius - ptrRadius) * sinf(angle);
+
+            ptrPos.x = position.x + dxx;
+            ptrPos.y = position.y + dyy;
+        }
     }
 
     void Move()
@@ -99,13 +127,14 @@ int main()
     {
         /* Update */
         player.Move();
-
+        player.ptrPos = GetMousePosition();
+        player.MovePointer();
         /* Draw */
         BeginDrawing();
 
-        ClearBackground(BLACK);
+        ClearBackground(RAYWHITE);
 
-        DrawFPS(5, 5); // Show current FPS
+        DrawFPS(10, 10); // Show current FPS
 
         player.Draw();
 
