@@ -1,15 +1,17 @@
+#include "entt.hpp"
 #include "raylib.h"
-
-#include "Player.h"
 
 class Game {
   public:
     Game(int, int);
     int MainLoop();
     void Update();
-    void UpdateCamera2D(Vector2 targetPos);
+    void UpdateCamera2D();
     void Draw();
+    void DrawSprites();
+    void DrawCursor();
 
-    Player player;
     Camera2D camera = {0};
+
+    entt::registry reg;
 };
