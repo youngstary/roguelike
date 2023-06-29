@@ -1,34 +1,20 @@
-#include "entt.hpp"
+#pragma once
+
+#include "Components.h"
 #include "raylib.h"
 
-struct Player {
-    float cursorRadius;
+class Player {
+  public:
+    Player(){};
+    Player(float x, float y);
+    void Move(const float frameTime);
+    void UpdatePointer(Camera2D *);
+    void Draw() const;
+    void Collision(EntityType type, HitBoxRect hitbox);
+
+    HitBoxRect hitbox;
+    Velocity vel = {0.0f, 0.0f, 200.0f, 60.0f, 80.0f};
+    float lastPosX;
+    HitBoxCircle cursor;
+    Sprite sprite;
 };
-
-struct Position {
-    Vector2 value;
-};
-
-struct Sprite {
-    Rectangle rect;
-    Color color;
-};
-
-struct Velocity {
-    Vector2 current;
-    float max;
-    float acc;
-    float dAcc;
-};
-
-struct CursorPos {
-    Vector2 pos;
-    float radius = 10;
-};
-
-struct CameraFocus {};
-
-entt::entity MakePlayer(entt::registry &, float, float);
-void UpdatePlayerVelocity(entt::registry &);
-void UpdatePositions(entt::registry &);
-void UpdatePointer(entt::registry &);
