@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <cstring>
+#include <cstdlib>
 #include "raylib.h"
 
 #include "utils.h"
@@ -23,39 +25,69 @@ void Map::Print()
 
 void Map::Generate()
 {
-    const int level = 4;
-    const int rooms = 5 + GetRandomValue(1, 3) + level * 2;
-    int x = 5;
-    int y = 5;
-    Room room = NORMAL;
-    Dir dir;
+    std::memset(map, 0, (10 * 10) * (sizeof *map));
+    const int level = 1;
 
-    for (int i = 0; i < rooms; i++)
+    int x = GetRandomValue(2, 7);
+    int y = GetRandomValue(2, 7);
+
+    int bossX, bossY, dx, dy;
+
+    do
     {
-        map[y][x] = room;
-        while (true)
+        bossX = GetRandomValue(0, 9);
+        bossY = GetRandomValue(0, 9);
+        dx = abs(bossX - x);
+        dy = abs(bossY - y);
+    } while (!(dx <= 3 + level && dx >= 3 && dy <= 3 + level && dy >= 3));
+
+    map[y][x] = NORMAL;
+    map[bossY][bossX] = BOSS;
+
+    int horizontal = dx;
+    int vertical = dy - 1; // One vertical move counts also as horizontal move
+    const int moves = horizontal + vertical;
+    int sequence[moves];
+
+    for (int i = 0; i < moves; i++)
+    {
+        int choice;
+
+        if (horizontal == 0)
+            choice = VERTICAL;
+        else if (vertical == 0)
+            choice = HORIZONTAL;
+        else
+            choice = GetRandomValue(HORIZONTAL, VERTICAL);
+
+        if (choice == HORIZONTAL)
         {
-            dir = Dir(GetRandomValue(0, 3));
-            if (dir == UP && y != 0 && map[y - 1][x] == 0)
-            {
-                y--;
-                break;
-            }
-            else if (dir == RIGHT && x != 10 && map[y][x + 1] == 0)
-            {
-                x++;
-                break;
-            }
-            else if (dir == DOWN && y != 10 && map[y + 1][x] == 0)
-            {
-                y++;
-                break;
-            }
-            else if (dir == LEFT && x != 0 && map[y][x - 1] == 0)
-            {
-                x--;
-                break;
-            }
+            if (x < bossX)
+                sequence[i] = RIGHT;
+            else
+                sequence[i] = LEFT;
+            horizontal--;
         }
+        else if (choice == VERTICAL)
+        {
+            if (y < bossY)
+                sequence[i] = DOWN;
+            else
+                sequence[i] = UP;
+            vertical--;
+        }
+    }
+
+    for (int move : sequence)
+    {
+        if (move == UP)
+            y--;
+        else if (move == RIGHT)
+            x++;
+        else if (move == DOWN)
+            y++;
+        else if (move == LEFT)
+            x--;
+        map[y][x] = NORMAL;
     }
 }

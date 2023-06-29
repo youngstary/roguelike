@@ -7,7 +7,7 @@ public:
     Map();
     void Print();
     void Generate();
-
+    
     int map[10][10] = {0};
 
     enum Dir
@@ -15,7 +15,9 @@ public:
         UP,
         RIGHT,
         DOWN,
-        LEFT
+        LEFT,
+        HORIZONTAL,
+        VERTICAL
     };
 
     enum Room
