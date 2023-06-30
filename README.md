@@ -1,4 +1,7 @@
-# Roguelike
+<h1 align="center">Roguelike</h1>
+<p align="center">
+<img src="https://github.com/youngstary/roguelike/actions/workflows/cmake.yml/badge.svg">
+</p>
 
 ## Roadmap
 <details>  
