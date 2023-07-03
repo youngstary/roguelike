@@ -15,6 +15,7 @@ class Player {
     HitBoxRect hitbox;
     Velocity vel = {0.0f, 0.0f, 200.0f, 60.0f, 80.0f};
     float lastPosX;
+    Health health = {5};
     HitBoxCircle cursor;
     Sprite sprite;
 };

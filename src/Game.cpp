@@ -1,14 +1,12 @@
-#include "raylib.h"
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-
 #include "Game.h"
+#include "Gui.h"
 
-Game::Game(int screenWidth, int screenHeight) {
+Game::Game(int screenWidth, int screenHeight)
+    : currentState(PLAYING), gui(PLAYING) {
     InitWindow(screenWidth, screenHeight,
                "raylib [core] example - basic window");
     SetTargetFPS(60);
-    GuiLoadStyleDefault();
+    SetExitKey(KEY_F11);
 }
 
 Game::~Game() { DestroyLevel(); }
@@ -17,8 +15,10 @@ int Game::MainLoop() {
     InitLevel();
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
+        nextState = currentState;
         Update();
         Draw();
+        currentState = nextState;
     }
 
     CloseWindow(); // Close window and OpenGL context
@@ -27,15 +27,28 @@ int Game::MainLoop() {
 }
 
 void Game::Update() {
-    const float frameTime = GetFrameTime();
-    // Player
-    player.Move(frameTime);
-    player.UpdatePointer(&camera);
+    switch (currentState) {
+    case PLAYING: {
+        TooglePause(PAUSE);
+        const float frameTime = GetFrameTime();
+        // Player
+        player.Move(frameTime);
+        player.UpdatePointer(&camera);
 
-    CheckCollisions();
+        CheckCollisions();
 
-    // Camera
-    UpdateCamera2D(player.hitbox.GetPosition());
+        // Camera
+        UpdateCamera2D(player.hitbox.GetPosition());
+
+        break;
+    }
+    case PAUSE:
+        TooglePause(PLAYING);
+        break;
+    default:
+        TraceLog(LOG_WARNING, "Case not handled: %d", currentState);
+        break;
+    }
 }
 
 void Game::UpdateCamera2D(Vector2 targetPos) { camera.target = targetPos; }
@@ -45,15 +58,22 @@ void Game::Draw() {
     BeginMode2D(camera);
     ClearBackground(RAYWHITE);
 
-    player.Draw();
-
     for (const auto &wall : walls) {
         wall.Draw();
     }
 
+    player.Draw();
+
     EndMode2D();
     // Draw GUI
-    DrawFPS(10, 10); // Show current FPS
+    const State result = gui.Draw(currentState);
+
+    if (result != currentState) {
+        ChangeState(result);
+        gui.ChangeLayout(result);
+    } else if (nextState != currentState) {
+        gui.ChangeLayout(nextState);
+    }
 
     EndDrawing();
 }
@@ -82,5 +102,13 @@ void Game::CheckCollisions() {
             player.Collision(WALL, wall.hitbox);
             break;
         }
+    }
+}
+
+void Game::ChangeState(State nextState) { this->nextState = nextState; }
+
+void Game::TooglePause(State nextState) {
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        ChangeState(nextState);
     }
 }
