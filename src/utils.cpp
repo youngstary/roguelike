@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdio.h>
+#include <vector>
 
 #include "utils.h"
 
@@ -19,7 +20,7 @@ void Map::Print() {
 }
 
 void Map::Generate() {
-    std::memset(map, 0, (10 * 10) * (sizeof *map));
+    std::memset(map, 0, (10 * 10) * (sizeof(int)));
     const int level = 1;
 
     int x = GetRandomValue(2, 7);
@@ -40,7 +41,7 @@ void Map::Generate() {
     int horizontal = dx;
     int vertical = dy - 1; // One vertical move counts also as horizontal move
     int moves = horizontal + vertical;
-    int sequence[moves];
+    std::vector<int> sequence(moves);
 
     for (int i = 0; i < moves; i++) {
         int choice;
@@ -114,11 +115,11 @@ int Map::GetRandomDirection(int x, int y) {
 
         if (dir == UP && y != 0 && map[y - 1][x] == 0)
             return UP;
-        else if (dir == RIGHT && x != 10 && map[y][x + 1] == 0)
+        else if (dir == RIGHT && x < 9 && map[y][x + 1] == 0) // Indeks od 0 do 9, a nie 10
             return RIGHT;
-        else if (dir == DOWN && y != 10 && map[y + 1][x] == 0)
+        else if (dir == DOWN && y < 9 && map[y + 1][x] == 0) // Indeks od 0 do 9, a nie 10
             return DOWN;
-        else if (dir == LEFT && x != 0 && map[y][x - 1] == 0)
+        else if (dir == LEFT && x > 0 && map[y][x - 1] == 0)  // Indeks od 0, a nie -1
             return LEFT;
     }
 }

@@ -7,9 +7,10 @@
 #include "raygui.h"
 #endif
 
-Gui::Gui(State state) {
+void Gui::Init(State state) {
     ChangeLayout(state);
     GuiLoadStyleDefault();
+    TraceLog(LOG_INFO, "Gui Style Loaded");
 }
 
 void Gui::ChangeLayout(State state) {
@@ -17,7 +18,7 @@ void Gui::ChangeLayout(State state) {
     const float screenHeight = GetScreenHeight();
     const float buttonWidth = 120.0f;
     const float buttonHeight = 24.0f;
-    const float spacing = 24.0f;
+    const float spacing = 10.0f;
 
     switch (state) {
     case PAUSE: {
@@ -25,13 +26,14 @@ void Gui::ChangeLayout(State state) {
         const float groupHeight = 168.0f;
         Vector2 anchor = {screenWidth / 2.0f - groupWidth / 2.0f,
                           screenHeight / 2.0f - groupHeight / 2.0f};
+        const float buttonCenterX = anchor.x + groupWidth / 2.0f - buttonWidth / 2.0f;
         layoutRecs[0] = Rectangle{anchor.x, anchor.y, groupWidth, groupHeight};
-        layoutRecs[1] = Rectangle{anchor.x + spacing, anchor.y,
-                                  buttonWidth + spacing, buttonHeight};
-        layoutRecs[2] = Rectangle{anchor.x + spacing, anchor.y,
-                                  buttonWidth + spacing * 2, buttonHeight};
-        layoutRecs[3] = Rectangle{anchor.x + spacing, anchor.y,
-                                  buttonWidth + spacing * 3, buttonHeight};
+        layoutRecs[1] = Rectangle{buttonCenterX, anchor.y + spacing,
+                                  buttonWidth, buttonHeight};
+        layoutRecs[2] = Rectangle{buttonCenterX, anchor.y + spacing * 2 + buttonHeight,
+                                  buttonWidth, buttonHeight};
+        layoutRecs[3] = Rectangle{buttonCenterX, anchor.y + spacing * 3 + buttonHeight * 2,
+                                  buttonWidth, buttonHeight};
         static_assert(3 < NUM_RECS, "NUM_RECS too small");
         break;
     }
@@ -47,8 +49,6 @@ State Gui::Draw(State state) {
     State newState = state;
 
     DrawFPS(10, 10); // Show current FPS
-
-    TraceLog(LOG_INFO, "Drawing GUI: %d", state);
 
     switch (state) {
     case PLAYING:

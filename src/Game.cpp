@@ -2,11 +2,12 @@
 #include "Gui.h"
 
 Game::Game(int screenWidth, int screenHeight)
-    : currentState(PLAYING), gui(PLAYING) {
+    : currentState(PLAYING) {
     InitWindow(screenWidth, screenHeight,
                "raylib [core] example - basic window");
     SetTargetFPS(60);
     SetExitKey(KEY_F11);
+    gui.Init(currentState);
 }
 
 Game::~Game() { DestroyLevel(); }
