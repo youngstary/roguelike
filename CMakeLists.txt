@@ -36,12 +36,6 @@ else()
     message(STATUS "RAYLIB_LIB_DIR is not defined!")
 endif()
 
-if(ENTT_INCLUDE_DIR)
-  include_directories(BEFORE SYSTEM ${ENTT_INCLUDE_DIR})
-else()
-  message(STATUS "ENTT_INCLUDE_DIR is not defined!")
-endif()
-
 add_executable(${PROJECT_NAME} ${game_sources})
 
 if (WIN32)
