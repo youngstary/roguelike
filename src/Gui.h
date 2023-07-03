@@ -6,8 +6,7 @@
 #define NUM_RECS 4
 
 struct Gui {
-    Gui(State state);
-
+    void Init(State state);
     void ChangeLayout(State);
     State Draw(State);
 
