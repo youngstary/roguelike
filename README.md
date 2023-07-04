@@ -9,8 +9,10 @@
   
   - [x] Basic movement
   - [x] Collisions with walls
-  - [ ] Health
-  - [ ] Attack ability
+  - [ ] Health // sb
+  - [ ] Pickups // sb
+  - [ ] Items // sb
+  - [ ] Attack ability // sb
   - [ ] Sprites and animations
 
 </details>
@@ -36,7 +38,12 @@
 </details>
 <details>
   <summary>Map Generation</summary>
-  
+
+  - [x] Connecting starting room with boss room
+  - [x] Item room generating
+  - [x] Shop generating
+  - [ ] Generating playable floor in game // ? sb
+
 </details>
 <details>
   <summary>GUI - Menu</summary>

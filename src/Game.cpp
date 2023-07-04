@@ -1,8 +1,7 @@
 #include "Game.h"
 #include "Gui.h"
 
-Game::Game(int screenWidth, int screenHeight)
-    : currentState(PLAYING) {
+Game::Game(int screenWidth, int screenHeight) : currentState(PLAYING) {
     InitWindow(screenWidth, screenHeight,
                "raylib [core] example - basic window");
     SetTargetFPS(60);

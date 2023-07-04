@@ -21,7 +21,7 @@ void Map::Print() {
 
 void Map::Generate() {
     std::memset(map, 0, (10 * 10) * (sizeof(int)));
-    const int level = 1;
+    const int level = 5;
 
     int x = GetRandomValue(2, 7);
     int y = GetRandomValue(2, 7);
@@ -72,8 +72,30 @@ void Map::Generate() {
     bool canCreateShop = true;
     int createItemRoom;
     int createShop;
+    int shopChance = moves - 3;
+    int itemRoomChance = moves - 3;
 
     for (int move : sequence) {
+        if (canCreateItemRoom)
+            createItemRoom = GetRandomValue(1, itemRoomChance);
+
+        if (canCreateShop)
+            createShop = GetRandomValue(1, shopChance);
+
+        if (createItemRoom == 1) {
+            MoveRandomDirection(x, y, ITEM, move);
+            canCreateItemRoom = false;
+            createItemRoom = -1;
+        } else
+            itemRoomChance--;
+
+        if (createShop == 1) {
+            MoveRandomDirection(x, y, SHOP, move);
+            canCreateShop = false;
+            createShop = -1;
+        } else
+            shopChance--;
+
         if (move == UP)
             y--;
         else if (move == RIGHT)
@@ -84,26 +106,6 @@ void Map::Generate() {
             x--;
 
         map[y][x] = NORMAL;
-
-        if (canCreateItemRoom)
-            createItemRoom = GetRandomValue(1, moves);
-
-        if (canCreateShop)
-            createShop = GetRandomValue(1, moves);
-
-        if (createItemRoom == 1) {
-            MoveRandomDirection(x, y, ITEM);
-            canCreateItemRoom = false;
-            createItemRoom = -1;
-        }
-
-        if (createShop == 1) {
-            MoveRandomDirection(x, y, SHOP);
-            canCreateShop = false;
-            createShop = -1;
-        }
-
-        moves--;
     }
 
     Map::Print();
@@ -115,17 +117,24 @@ int Map::GetRandomDirection(int x, int y) {
 
         if (dir == UP && y != 0 && map[y - 1][x] == 0)
             return UP;
-        else if (dir == RIGHT && x < 9 && map[y][x + 1] == 0) // Indeks od 0 do 9, a nie 10
+        else if (dir == RIGHT && x < 9 && map[y][x + 1] == 0)
             return RIGHT;
-        else if (dir == DOWN && y < 9 && map[y + 1][x] == 0) // Indeks od 0 do 9, a nie 10
+        else if (dir == DOWN && y < 9 && map[y + 1][x] == 0)
             return DOWN;
-        else if (dir == LEFT && x > 0 && map[y][x - 1] == 0)  // Indeks od 0, a nie -1
+        else if (dir == LEFT && x > 0 && map[y][x - 1] == 0)
             return LEFT;
     }
 }
 
-void Map::MoveRandomDirection(int x, int y, int room) {
-    int dir = Map::GetRandomDirection(x, y);
+void Map::MoveRandomDirection(int x, int y, int room, int move = -1) {
+    int dir;
+    if (move == -1)
+        dir = Map::GetRandomDirection(x, y);
+    else {
+        do {
+            dir = Map::GetRandomDirection(x, y);
+        } while (dir == move);
+    }
 
     if (dir == UP)
         map[y - 1][x] = room;
