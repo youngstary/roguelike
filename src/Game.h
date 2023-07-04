@@ -4,6 +4,7 @@
 #include "raylib.h"
 
 #include "Components.h"
+#include "Enemies.h"
 #include "Gui.h"
 #include "Player.h"
 #include "StaticObjects.h"
@@ -25,6 +26,7 @@ struct Game {
 
     Player player;
     std::vector<Wall> walls;
+    std::vector<Enemy> enemies;
     Camera2D camera = {0};
     State currentState;
     State nextState = currentState;

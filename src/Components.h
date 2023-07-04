@@ -1,5 +1,13 @@
 #pragma once
 #include "raylib.h"
+#include <cmath>
+#include <math.h>
+#include <raymath.h>
+
+class Game;
+class Player;
+class Enemy;
+class Wall;
 
 enum State { PLAYING, PAUSE, MAIN_MENU };
 
@@ -23,9 +31,15 @@ struct HitBoxCircle : Vector2 {
 };
 
 struct Velocity : Vector2 {
+    float current;
+    float angle;
     float max;
     float acc;
     float dAcc;
+    void UpdateAngle(Vector2 vec) { angle = -atan2f(vec.x, vec.y) + PI; }
+    void DrawVectorLine(float _x, float _y) const {
+        DrawLine(_x, _y, _x + x, _y + y, ORANGE);
+    }
 };
 
 struct Sprite {

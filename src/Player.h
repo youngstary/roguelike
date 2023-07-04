@@ -13,9 +13,9 @@ class Player {
     void Collision(EntityType type, HitBoxRect hitbox);
 
     HitBoxRect hitbox;
-    Velocity vel = {0.0f, 0.0f, 200.0f, 60.0f, 80.0f};
+    Velocity vel;
     float lastPosX;
-    Health health = {5};
+    Health health;
     HitBoxCircle cursor;
     Sprite sprite;
 };

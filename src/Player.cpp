@@ -4,52 +4,46 @@
 #include <raylib.h>
 #include <raymath.h>
 
-Player::Player(float x, float y) : hitbox({x, y, 32, 32}) {
-    cursor.radius = 15.0f;
-}
+Player::Player(float x, float y)
+    : hitbox({x, y, 32, 32}),
+      vel(Velocity{
+          .current = 0.0f, .max = 250.0f, .acc = 70.0f, .dAcc = 80.0f}),
+      health({5}), cursor({15.0f}) {}
 
 void Player::Move(const float frameTime) {
     // X-axis
+    float x = 0.0f;
     if (IsKeyDown(KEY_D)) {
-        vel.x += vel.acc;
-        if (vel.x > vel.max) {
-            vel.x = vel.max;
-        }
+        x = 1.0f;
     } else if (IsKeyDown(KEY_A)) {
-        vel.x -= vel.acc;
-        if (vel.x < -vel.max) {
-            vel.x = -vel.max;
-        }
-    } else {
-        if (vel.x >= vel.dAcc) {
-            vel.x -= vel.dAcc;
-        } else if (vel.x <= -vel.dAcc) {
-            vel.x += vel.dAcc;
-        } else {
-            vel.x = 0;
-        }
+        x = -1.0f;
     }
 
     // Y-axis
+    float y = 0.0f;
     if (IsKeyDown(KEY_W)) {
-        vel.y -= vel.acc;
-        if (vel.y < -vel.max) {
-            vel.y = -vel.max;
-        }
+        y = -1.0f;
     } else if (IsKeyDown(KEY_S)) {
-        vel.y += vel.acc;
-        if (vel.y > vel.max) {
-            vel.y = vel.max;
+        y = 1.0f;
+    }
+
+    if (x == 0.0f && y == 0.0f) {
+        vel.current -= vel.dAcc;
+        if (vel.current < 0.0f) {
+            vel.current = 0.0f;
         }
     } else {
-        if (vel.y >= vel.dAcc) {
-            vel.y -= vel.dAcc;
-        } else if (vel.y <= -vel.dAcc) {
-            vel.y += vel.dAcc;
-        } else {
-            vel.y = 0;
+        vel.UpdateAngle({x, y});
+
+        vel.current += vel.acc;
+        if (vel.current > vel.max) {
+            vel.current = vel.max;
         }
     }
+
+    Vector2 moveVector = Vector2Rotate(Vector2{0.0f, -vel.current}, vel.angle);
+    vel.x = moveVector.x;
+    vel.y = moveVector.y;
 
     lastPosX = hitbox.x;
     hitbox.x += vel.x * frameTime;
@@ -77,6 +71,7 @@ void Player::UpdatePointer(Camera2D *camera) {
 void Player::Draw() const {
     // Draw hitbox
     hitbox.DrawHitBox(BLUE);
+    vel.DrawVectorLine(hitbox.x, hitbox.y);
 
     // Draw cursor
     cursor.DrawHitBox(RED);

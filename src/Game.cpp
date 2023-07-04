@@ -1,11 +1,11 @@
 #include "Game.h"
+#include "Components.h"
 #include "Gui.h"
 
-Game::Game(int screenWidth, int screenHeight)
-    : currentState(PLAYING) {
+Game::Game(int screenWidth, int screenHeight) : currentState(PLAYING) {
     InitWindow(screenWidth, screenHeight,
                "raylib [core] example - basic window");
-    SetTargetFPS(60);
+    SetTargetFPS(15);
     SetExitKey(KEY_F11);
     gui.Init(currentState);
 }
@@ -36,6 +36,10 @@ void Game::Update() {
         player.Move(frameTime);
         player.UpdatePointer(&camera);
 
+        for (auto &enemy : enemies) {
+            enemy.Move(player);
+        }
+
         CheckCollisions();
 
         // Camera
@@ -61,6 +65,10 @@ void Game::Draw() {
 
     for (const auto &wall : walls) {
         wall.Draw();
+    }
+
+    for (const auto &enemy : enemies) {
+        enemy.Draw();
     }
 
     player.Draw();
@@ -91,9 +99,14 @@ void Game::InitLevel() {
 
     walls.emplace_back(Wall(0.0f, 0.0f, screenWidth, 100.0f));
     walls.emplace_back(Wall(0.0f, 150.0f, 100.0f, screenHeight));
+
+    enemies.emplace_back(Enemy(300.0f, 300.0f, MELEE));
 }
 
-void Game::DestroyLevel() { walls.clear(); }
+void Game::DestroyLevel() {
+    walls.clear();
+    enemies.clear();
+}
 
 void Game::CheckCollisions() {
     // Player - Walls
