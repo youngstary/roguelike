@@ -5,7 +5,7 @@
 #include <raymath.h>
 
 Player::Player(float x, float y)
-    : hitbox({x, y, 32, 32}),
+    : hitbox({x, y, 32.0f, 32.0f, EntityType::PLAYER}),
       vel(Velocity{
           .current = 0.0f, .max = 250.0f, .acc = 70.0f, .dAcc = 80.0f}),
       health({5}), cursor({15.0f}) {}

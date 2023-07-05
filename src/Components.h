@@ -11,9 +11,10 @@ class Wall;
 
 enum State { PLAYING, PAUSE, MAIN_MENU };
 
-enum EntityType { PLAYER = 0, WALL };
+enum EntityType { PLAYER, WALL, ENEMY };
 
 struct HitBoxRect : Rectangle {
+    EntityType type;
     Vector2 GetPosition() const { return Vector2{x, y}; }
     Vector2 GetCenter() const { return Vector2{x + width / 2, y + height / 2}; }
     Rectangle BeforeMoveX(float velocityX) const {

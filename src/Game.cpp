@@ -36,8 +36,9 @@ void Game::Update() {
         player.Move(frameTime);
         player.UpdatePointer(&camera);
 
-        for (auto &enemy : enemies) {
-            enemy.Move(player);
+        for (size_t i = 0; i < enemies.size(); i++) {
+            CalcEnemyMovWeight(i);
+            enemies[i].Move(frameTime);
         }
 
         CheckCollisions();
@@ -97,10 +98,11 @@ void Game::InitLevel() {
 
     player = Player(screenWidth * 0.5f, screenHeight * 0.5f);
 
-    walls.emplace_back(Wall(0.0f, 0.0f, screenWidth, 100.0f));
-    walls.emplace_back(Wall(0.0f, 150.0f, 100.0f, screenHeight));
+    // walls.emplace_back(Wall(0.0f, 0.0f, screenWidth, 100.0f));
+    // walls.emplace_back(Wall(0.0f, 150.0f, 100.0f, screenHeight));
 
     enemies.emplace_back(Enemy(300.0f, 300.0f, MELEE));
+    enemies.emplace_back(Enemy(300.0f, 600.0f, RANGER));
 }
 
 void Game::DestroyLevel() {
@@ -124,5 +126,22 @@ void Game::ChangeState(State nextState) { this->nextState = nextState; }
 void Game::TooglePause(State nextState) {
     if (IsKeyPressed(KEY_ESCAPE)) {
         ChangeState(nextState);
+    }
+}
+
+void Game::CalcEnemyMovWeight(size_t i) {
+    auto &enemy = enemies[i];
+    enemy.ResetWeight();
+    enemy.CalcWeight(player.hitbox);
+
+    for (size_t j = 0; j < enemies.size(); j++) {
+        if (i == j)
+            continue;
+
+        enemy.CalcWeight(enemies[j].hitbox);
+    }
+
+    for (const auto &wall : walls) {
+        enemy.CalcWeight(wall.hitbox);
     }
 }

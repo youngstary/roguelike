@@ -23,6 +23,7 @@ struct Game {
     void PlayerCollisions();
     void ChangeState(State nextState);
     void TooglePause(State nextState);
+    void CalcEnemyMovWeight(size_t i);
 
     Player player;
     std::vector<Wall> walls;
