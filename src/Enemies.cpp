@@ -5,6 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <algorithm>
+#include <cstddef>
 
 int sgn(float val) { return (0.0f <= val) - (val < 0.0f); }
 
@@ -55,20 +56,22 @@ Enemy::Enemy(float x, float y, EnemyType type) : type(type) {
 }
 
 void Enemy::Move(const float frameTime) {
-    TraceLog(LOG_INFO, "Final weight: %f %f", movementWeight.x,
-             movementWeight.y);
-
-    if (std::abs(movementWeight.x) > 1.5f ||
-        std::abs(movementWeight.y) > 1.5f) {
-        vel.current += vel.acc;
-    } else if (vel.current > 0) {
-        vel.current = (vel.current - vel.dAcc < 0) ? 0 : vel.current - vel.dAcc;
+    for (size_t i = 0; i < numOfRays; i++) {
+        if (context.dangers[i] > 0.0f) {
+            context.interests[i] = 0.0f;
+        }
     }
-    if (vel.current > vel.max) {
-        vel.current = vel.max;
+    Vector2 chosenDir = {0};
+    for (size_t i = 0; i < numOfRays; i++) {
+        chosenDir.x += context.rays[i].x * context.interests[i];
+        chosenDir.y += context.rays[i].y * context.interests[i];
     }
 
-    vel.UpdateAngle(movementWeight);
+    TraceLog(LOG_INFO, "x: %f y: %f", chosenDir.x, chosenDir.y);
+
+    vel.current = 150.0f;
+
+    vel.UpdateAngle(chosenDir);
     Vector2 moveVector = Vector2Rotate(Vector2{0.0f, -vel.current}, vel.angle);
     vel.x = moveVector.x;
     vel.y = moveVector.y;
@@ -77,35 +80,73 @@ void Enemy::Move(const float frameTime) {
     hitbox.y += vel.y * frameTime;
 }
 
-void Enemy::Draw() const { hitbox.DrawHitBox(sprite.color); }
-
-void Enemy::CalcWeight(const HitBoxRect &target) {
-    float targetRight = (hitbox.x + hitbox.width) - target.x;
-    float targetLeft = hitbox.x - (target.x + target.width);
-    bool intersectsX =
-        CheckAxisIntersections(hitbox.x, hitbox.width, target.x, target.width);
-    float x = (intersectsX)                                    ? 0
-              : (std::abs(targetRight) < std::abs(targetLeft)) ? targetRight
-                                                               : targetLeft;
-    float targetUp = hitbox.y - (target.y + target.height);
-    float targetDown = (hitbox.y + hitbox.height) - target.y;
-    bool intersectsY = CheckAxisIntersections(hitbox.y, hitbox.height, target.y,
-                                              target.height);
-    float y = (intersectsY)                                 ? 0
-              : (std::abs(targetUp) < std::abs(targetDown)) ? targetUp
-                                                            : targetDown;
-
-    float vecLength = Vector2Length({x, y}) + 0.001f;
-
-    TraceLog(LOG_INFO, "x: %f, y: %f, length: %f", x, y, vecLength);
-
-    const float priority = 100.0f;
-
-    movementWeight.x += priority / vecLength * sgn(x) * sgn(type);
-    movementWeight.y += priority / vecLength * sgn(y) * sgn(type);
+void Enemy::Draw() const {
+    hitbox.DrawHitBox(sprite.color);
+    context.DrawRays(hitbox.GetCenter());
 }
 
-void Enemy::ResetWeight() {
-    movementWeight.x = 0.0f;
-    movementWeight.y = 0.0f;
+// void Enemy::CalcWeight(const HitBoxRect &target) {
+//     float targetRight = (hitbox.x + hitbox.width) - target.x;
+//     float targetLeft = hitbox.x - (target.x + target.width);
+//     bool intersectsX =
+//         CheckAxisIntersections(hitbox.x, hitbox.width, target.x,
+//         target.width);
+//     float x = (intersectsX)                                    ? 0
+//               : (std::abs(targetRight) < std::abs(targetLeft)) ? targetRight
+//                                                                : targetLeft;
+//     float targetUp = hitbox.y - (target.y + target.height);
+//     float targetDown = (hitbox.y + hitbox.height) - target.y;
+//     bool intersectsY = CheckAxisIntersections(hitbox.y, hitbox.height,
+//     target.y,
+//                                               target.height);
+//     float y = (intersectsY)                                 ? 0
+//               : (std::abs(targetUp) < std::abs(targetDown)) ? targetUp
+//                                                             : targetDown;
+
+//     float vecLength = Vector2Length({x, y}) + 0.001f;
+
+//     TraceLog(LOG_INFO, "x: %f, y: %f, length: %f", x, y, vecLength);
+
+//     const float priority = 100.0f * sgn(type);
+
+//     if (vecLength > 20.5f) {
+//         movementWeight.x += priority / vecLength * sgn(x);
+//         movementWeight.y += priority / vecLength * sgn(y);
+//     }
+// }
+
+// void Enemy::ResetWeight() {
+//     movementWeight.x = 0.0f;
+//     movementWeight.y = 0.0f;
+// }
+
+void Enemy::AddToContext(const HitBoxRect &target) {
+    switch (target.type) {
+    case PLAYER: {
+        for (size_t i = 0; i < numOfRays; i++) {
+            Vector2 targetVec = target.GetCenter();
+            targetVec.x -= hitbox.x;
+            targetVec.y -= hitbox.y;
+            float dot = Vector2DotProduct(context.rays[i], targetVec);
+            TraceLog(LOG_INFO, "i: %d dot: %f", i, dot);
+            context.interests[i] = std::max(0.0f, dot);
+        }
+        break;
+    }
+    case WALL:
+        break;
+    case ENEMY:
+        break;
+    default:
+        break;
+    }
+}
+
+void Enemy::PopulateContext() {
+    for (size_t i = 0; i < numOfRays; i++) {
+        const float angle = i * 2 * PI / numOfRays;
+        context.rays[i] = Vector2Rotate({0.0f, -1.0f}, angle);
+        context.interests[i] = 0.5f;
+        context.dangers[i] = 0.0f;
+    }
 }

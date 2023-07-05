@@ -102,7 +102,7 @@ void Game::InitLevel() {
     // walls.emplace_back(Wall(0.0f, 150.0f, 100.0f, screenHeight));
 
     enemies.emplace_back(Enemy(300.0f, 300.0f, MELEE));
-    enemies.emplace_back(Enemy(300.0f, 600.0f, RANGER));
+    // enemies.emplace_back(Enemy(300.0f, 600.0f, RANGER));
 }
 
 void Game::DestroyLevel() {
@@ -131,17 +131,17 @@ void Game::TooglePause(State nextState) {
 
 void Game::CalcEnemyMovWeight(size_t i) {
     auto &enemy = enemies[i];
-    enemy.ResetWeight();
-    enemy.CalcWeight(player.hitbox);
+    enemy.PopulateContext();
+    enemy.AddToContext(player.hitbox);
 
     for (size_t j = 0; j < enemies.size(); j++) {
         if (i == j)
             continue;
 
-        enemy.CalcWeight(enemies[j].hitbox);
+        enemy.AddToContext(enemies[j].hitbox);
     }
 
     for (const auto &wall : walls) {
-        enemy.CalcWeight(wall.hitbox);
+        enemy.AddToContext(wall.hitbox);
     }
 }
